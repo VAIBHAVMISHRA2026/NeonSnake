@@ -1,6 +1,13 @@
 # Neon Snake: Expert Community Edition 🐍✨
 
-Neon Snake is a highly polished, arcade-action, modern reimagining of the classic snake game written in Python 3.13+ using **Pygame Community Edition**. It features sub-pixel movement interpolation, 11 different unlockable skins, procedural audio synthesizer, particle explosion bursts, screen effects (shake, flash, chromatic aberration, glitched scanlines), boss fights, multiple items/powerups, and an optional atmosphere-driven **Horror Mode**.
+## 🚀 Play Live in Browser & Download Desktop App
+
+- **🌐 Play Instantly on Mobile & PC (Web Browser):** [**Click Here to Play Live**](https://vaibhavmishra2026.github.io/NeonSnake/)
+- **💻 Download for Desktop (Windows App):** [**Download NeonSnakeArena.exe (17.5 MB)**](https://github.com/VAIBHAVMISHRA2026/NeonSnake/raw/main/dist/NeonSnakeArena.exe)
+
+---
+
+Neon Snake is a highly polished, arcade-action, modern reimagining of the classic snake game written in Python 3.14+ using **Pygame Community Edition**. It features sub-pixel movement interpolation, 11 different unlockable skins, procedural audio synthesizer, particle explosion bursts, screen effects (shake, flash, chromatic aberration, glitched scanlines), boss fights, multiple items/powerups, and an optional atmosphere-driven **Horror Mode**.
 
 ## Features
 
