@@ -282,10 +282,28 @@ class GameEngine:
         self.floating_texts.append(FloatingText(text, x, y, color, size))
 
     def handle_input(self, keys: Any) -> None:
-        """Converts keyboard key bindings into 2D directional vectors for snake slithering path."""
+        """Converts keyboard key bindings or touch coordinates into 2D directional vectors for snake slithering path."""
         if self.state != "PLAYING":
             return
             
+        # 1. Check Mouse / Touch steer
+        mouse_down = pygame.mouse.get_pressed()[0]
+        if mouse_down:
+            mx, my = pygame.mouse.get_pos()
+            # Convert snake coordinates to screen space
+            shake_offset = self.effects.get_shake_offset()
+            spx, spy = self.camera.to_screen(self.snake.x, self.snake.y, shake_offset)
+            
+            dx = mx - spx
+            dy = my - spy
+            dist = (dx**2 + dy**2)**0.5
+            if dist > 15.0:
+                dx /= dist
+                dy /= dist
+                self.snake.set_target_direction(dx, dy)
+                return  # Touch/Mouse overrides keyboard keys
+            
+        # 2. Keyboard steer fallback
         sets = self.save_manager.get_settings()
         control_scheme = sets.get("control_scheme", "WASD")
         
@@ -490,6 +508,10 @@ class GameEngine:
             if self.countdown_timer <= 0.0:
                 self.state = "PLAYING"
                 self.countdown_timer = 3.0
+        elif self.state == "PAUSED":
+            self.menu_system.update("PAUSED", pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0], self.is_mouse_clicked_frame(), dt)
+        elif self.state == "GAMEOVER":
+            self.menu_system.update("GAMEOVER", pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0], self.is_mouse_clicked_frame(), dt)
 
     def is_mouse_clicked_frame(self) -> bool:
         """Returns True if the mouse button was newly pressed this frames."""

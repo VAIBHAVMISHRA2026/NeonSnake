@@ -90,15 +90,15 @@ class MenuSystem:
         
         # 1. MAIN MENU (Bigger list of features)
         self.buttons["MAIN"] = [
-            UIButton(pygame.Rect(cx - 120, 180, 240, 42), "PLAY", lambda: self.change_state("PLAYING"), Settings.COLOR_CYAN, Settings.COLOR_GREEN),
-            UIButton(pygame.Rect(cx - 120, 230, 240, 42), "SHOP", lambda: self.change_state("SHOP"), Settings.COLOR_CYAN, Settings.COLOR_PINK),
-            UIButton(pygame.Rect(cx - 120, 280, 240, 42), "HOW TO PLAY", lambda: self.change_state("HOWTOPLAY")),
-            UIButton(pygame.Rect(cx - 120, 330, 240, 42), "STATISTICS", lambda: self.change_state("STATISTICS")),
-            UIButton(pygame.Rect(cx - 120, 380, 240, 42), "HIGHSCORES", lambda: self.change_state("HIGHSCORES")),
-            UIButton(pygame.Rect(cx - 120, 430, 240, 42), "ACHIEVEMENTS", lambda: self.change_state("ACHIEVEMENTS")),
-            UIButton(pygame.Rect(cx - 120, 480, 240, 42), "SETTINGS", lambda: self.change_state("SETTINGS")),
-            UIButton(pygame.Rect(cx - 120, 530, 240, 42), "CREDITS", lambda: self.change_state("CREDITS")),
-            UIButton(pygame.Rect(cx - 120, 580, 240, 42), "EXIT", lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)), Settings.COLOR_RED, Settings.COLOR_PINK)
+            UIButton(pygame.Rect(cx - 120, 210, 240, 38), "PLAY", lambda: self.change_state("PLAYING"), Settings.COLOR_CYAN, Settings.COLOR_GREEN),
+            UIButton(pygame.Rect(cx - 120, 256, 240, 38), "SHOP", lambda: self.change_state("SHOP"), Settings.COLOR_CYAN, Settings.COLOR_PINK),
+            UIButton(pygame.Rect(cx - 120, 302, 240, 38), "HOW TO PLAY", lambda: self.change_state("HOWTOPLAY")),
+            UIButton(pygame.Rect(cx - 120, 348, 240, 38), "STATISTICS", lambda: self.change_state("STATISTICS")),
+            UIButton(pygame.Rect(cx - 120, 394, 240, 38), "HIGHSCORES", lambda: self.change_state("HIGHSCORES")),
+            UIButton(pygame.Rect(cx - 120, 440, 240, 38), "ACHIEVEMENTS", lambda: self.change_state("ACHIEVEMENTS")),
+            UIButton(pygame.Rect(cx - 120, 486, 240, 38), "SETTINGS", lambda: self.change_state("SETTINGS")),
+            UIButton(pygame.Rect(cx - 120, 532, 240, 38), "CREDITS", lambda: self.change_state("CREDITS")),
+            UIButton(pygame.Rect(cx - 120, 578, 240, 38), "EXIT", lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)), Settings.COLOR_RED, Settings.COLOR_PINK)
         ]
 
         # 2. SHOP MENU BACK BUTTON

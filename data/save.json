@@ -35,7 +35,10 @@
         "total_coins_collected": 2060,
         "time_played_seconds": 0.0,
         "max_level_reached": 6,
-        "max_combo_reached": 10
+        "max_combo_reached": 10,
+        "ai_snakes_killed": 0,
+        "games_played": 0,
+        "max_kills_in_run": 0
     },
     "missions": [
         {

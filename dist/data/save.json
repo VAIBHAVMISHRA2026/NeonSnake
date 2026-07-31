@@ -1,0 +1,67 @@
+{
+    "high_score": 2020,
+    "coins": 990,
+    "unlocked_skins": [
+        "classic"
+    ],
+    "current_skin": "classic",
+    "unlocked_achievements": [
+        "first_bite",
+        "power_trip",
+        "high_score_1k"
+    ],
+    "missions": [
+        {
+            "id": "eat_food",
+            "text": "Eat 25 Food Units",
+            "target": 25,
+            "current": 25,
+            "reward": 80,
+            "completed": true
+        },
+        {
+            "id": "defeat_boss",
+            "text": "Defeat a Boss Core",
+            "target": 1,
+            "current": 0,
+            "reward": 150,
+            "completed": false
+        },
+        {
+            "id": "score_points",
+            "text": "Reach 1,500 Score",
+            "target": 1500,
+            "current": 1500,
+            "reward": 100,
+            "completed": true
+        }
+    ],
+    "settings": {
+        "music_volume": 0.5,
+        "sfx_volume": 0.6,
+        "fullscreen": false,
+        "fps_limit": 60,
+        "resolution": "1280x720",
+        "control_scheme": "WASD",
+        "difficulty": "Medium",
+        "horror_mode": false,
+        "keybindings": {
+            "UP": 1073741906,
+            "DOWN": 1073741905,
+            "LEFT": 1073741904,
+            "RIGHT": 1073741903
+        }
+    },
+    "stats": {
+        "total_food_eaten": 93,
+        "total_deaths": 1,
+        "total_bosses_defeated": 0,
+        "total_coins_collected": 990,
+        "ai_snakes_killed": 12,
+        "games_played": 5,
+        "time_played_seconds": 223.09999999996603,
+        "max_level_reached": 3,
+        "max_combo_reached": 15,
+        "max_kills_in_run": 7
+    }
+}
