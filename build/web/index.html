@@ -181,7 +181,8 @@ function show_infobox() {
     <title>game</title>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="height=device-height, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes"/>
 
@@ -233,17 +234,13 @@ function show_infobox() {
             bottom: 0;
             left: 0;
             right: 0;
-            max-width: 100vw;
-            max-height: 100vh;
-            object-fit: contain;
         }
 
         body {
             font-family: arial;
             margin: 0;
             padding: none;
-            background-color:#050508;
-            overflow: hidden;
+            background-color:powderblue;
         }
 
         .topright{
@@ -279,12 +276,10 @@ function show_infobox() {
     </style>
 
     <script>
-/*
         if (navigator.serviceWorker)
             navigator.serviceWorker.register("https://pygame-web.github.io/cdn/0.9.3/pygbag0.9.3.js")
         else
             console.warn("Service workers not supported")
-*/
     </script>
 
     <script src="https://pygame-web.github.io/cdn/0.9.3//browserfs.min.js"></script>

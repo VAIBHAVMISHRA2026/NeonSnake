@@ -25,7 +25,7 @@ class AudioManager:
         """Initializes pygame mixer safely, taking system audio capabilities into account."""
         try:
             if not pygame.mixer.get_init():
-                pygame.mixer.init(frequency=22050, size=-16, channels=1, buffer=1024)
+                pygame.mixer.init(frequency=22050, size=-16, channels=1, buffer=4096)
         except Exception as e:
             print(f"[AudioManager] Critical: Failed to initialize sound card mixer. {e}")
 

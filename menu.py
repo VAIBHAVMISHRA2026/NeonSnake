@@ -542,56 +542,47 @@ class MenuSystem:
     def draw_highscores_menu(self, surface: pygame.Surface, font_sm: pygame.font.Font, font_md: pygame.font.Font, font_lg: pygame.font.Font) -> None:
         cx = self.width // 2
         # Title
-        t_surf = font_lg.render("ARCADE HALL OF FAME", True, Settings.COLOR_GOLD)
+        t_surf = font_lg.render("ARCADE PERSONAL BESTS", True, Settings.COLOR_GOLD)
         surface.blit(t_surf, (cx - t_surf.get_width()//2, 50))
         
-        # Under construction Offline leaderboard layout
         # Read player's score
         top_score = self.save_manager.get_high_score()
+        stats_data = self.save_manager.data.get("stats", {})
         
         leaderboard_panel = pygame.Rect(cx - 250, 140, 500, 390)
         Utils.draw_rounded_rect(surface, leaderboard_panel, (15, 15, 25, 200), radius=12)
         Utils.draw_rounded_rect(surface, leaderboard_panel, Settings.COLOR_GOLD, radius=12, border_width=1)
         
         # Render lists headers
-        h_rank = font_md.render("RANK", True, Settings.COLOR_GOLD)
-        h_name = font_md.render("PLAYER", True, Settings.COLOR_GOLD)
-        h_score = font_md.render("SCORE", True, Settings.COLOR_GOLD)
+        h_rank = font_md.render("RECORD TYPE", True, Settings.COLOR_GOLD)
+        h_score = font_md.render("BEST VALUE", True, Settings.COLOR_GOLD)
         
         surface.blit(h_rank, (cx - 200, 160))
-        surface.blit(h_name, (cx - 50, 160))
-        surface.blit(h_score, (cx + 100, 160))
+        surface.blit(h_score, (cx + 200 - h_score.get_width(), 160))
         
         pygame.draw.line(surface, Settings.COLOR_DARK_GRAY, (cx - 220, 195), (cx + 220, 195), 1)
         
-        # Dummy bot leaderboard filled around user's high score
-        mock_leaders = [
-            ("ApexViper", 12500),
-            ("ByteEater", 9800),
-            ("SlitherLord", 7600),
-            ("YOU", top_score),
-            ("CyberWorm", 4200),
-            ("NeonGrid", 2100)
+        records = [
+            ("HIGHEST SCORE", f"{top_score} Pts"),
+            ("MAX STAGE LEVEL", f"Level {stats_data.get('max_level_reached', 1)}"),
+            ("MAX STAGE KILLS", f"{stats_data.get('max_kills_in_run', 0)} Kills"),
+            ("MAX COMBO RATE", f"{stats_data.get('max_combo_reached', 0)}x Combo"),
+            ("COINS BALANCE", f"{self.save_manager.get_coins()} Gold")
         ]
-        # Sort desc
-        mock_leaders.sort(key=lambda x: x[1], reverse=True)
         
-        list_y = 215
-        for idx, (name, val) in enumerate(mock_leaders[:7]):
-            color = Settings.COLOR_PINK if name == "YOU" else Settings.COLOR_WHITE
+        list_y = 220
+        for idx, (label, val) in enumerate(records):
+            # Label
+            lbl_surf = font_md.render(f"{idx + 1}. {label}", True, Settings.COLOR_WHITE)
+            # Value
+            val_surf = font_md.render(val, True, Settings.COLOR_GOLD)
             
-            # Rank
-            r_surf = font_md.render(f"#{idx + 1}", True, color)
-            # Name
-            n_surf = font_md.render(name, True, color)
-            # Score
-            s_surf = font_md.render(f"{val}", True, color)
+            surface.blit(lbl_surf, (cx - 200, list_y))
+            surface.blit(val_surf, (cx + 200 - val_surf.get_width(), list_y))
             
-            surface.blit(r_surf, (cx - 200, list_y))
-            surface.blit(n_surf, (cx - 50, list_y))
-            surface.blit(s_surf, (cx + 100, list_y))
-            
-            list_y += 42
+            # Subtle divider
+            pygame.draw.line(surface, (30, 30, 40), (cx - 200, list_y + 36), (cx + 200, list_y + 36), 1)
+            list_y += 48
 
     def draw_achievements_menu(self, surface: pygame.Surface, font_sm: pygame.font.Font, font_md: pygame.font.Font, font_lg: pygame.font.Font) -> None:
         cx = self.width // 2
