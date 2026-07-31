@@ -177,14 +177,15 @@ class HUD:
         lives: int,
         shield_active: bool,
         active_powerups: Dict[str, float],
+        kills: int,
         font_sm: pygame.font.Font,
         font_md: pygame.font.Font
     ) -> None:
         """Renders HUD layout: Level progress bar, powerups, combo, scores, lives."""
         
-        # 1. Top Left - Score & Coins
+        # 1. Top Left - Score, Coins & Kills
         # Draw gradient panel under score
-        score_panel = pygame.Rect(15, 15, 260, 80)
+        score_panel = pygame.Rect(15, 15, 260, 105)
         # Background
         Utils.draw_rounded_rect(surface, score_panel, (15, 15, 25, 200), radius=10)
         Utils.draw_rounded_rect(surface, score_panel, Settings.COLOR_CYAN, radius=10, border_width=1)
@@ -197,7 +198,7 @@ class HUD:
                 score_surf, 
                 (int(score_surf.get_width() * self.score_scale), int(score_surf.get_height() * self.score_scale))
             )
-        surface.blit(score_surf, (30, 25))
+        surface.blit(score_surf, (30, 22))
         
         coin_text = f"COINS: {coins}"
         coin_surf = font_sm.render(coin_text, True, Settings.COLOR_GOLD)
@@ -206,7 +207,11 @@ class HUD:
                 coin_surf,
                 (int(coin_surf.get_width() * self.coins_scale), int(coin_surf.get_height() * self.coins_scale))
             )
-        surface.blit(coin_surf, (30, 55))
+        surface.blit(coin_surf, (30, 50))
+
+        kills_text = f"KILLS: {kills}"
+        kills_surf = font_sm.render(kills_text, True, Settings.COLOR_PINK)
+        surface.blit(kills_surf, (30, 75))
         
         # 2. Top Center - Level Progress (XP bar)
         progress_w = 400

@@ -329,6 +329,14 @@ class GameEngine:
             time_scale = 0.4 if "Slow Motion" in self.active_powerups else 1.0
             tick_dt = dt * time_scale
             
+            # Increment game timers
+            self.game_time += dt
+            self.save_manager.increment_stat("time_played_seconds", dt)
+            
+            # Level-up banner timer decay
+            if self.levelup_banner_timer > 0.0:
+                self.levelup_banner_timer -= dt
+            
             # 1. Update powerup durations
             for name in list(self.active_powerups.keys()):
                 self.active_powerups[name] -= dt
@@ -471,6 +479,17 @@ class GameEngine:
             self.menu_system.update("ACHIEVEMENTS", pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0], self.is_mouse_clicked_frame(), dt)
         elif self.state == "KEYBINDINGS":
             self.menu_system.update("KEYBINDINGS", pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0], self.is_mouse_clicked_frame(), dt)
+        elif self.state == "HOWTOPLAY":
+            self.menu_system.update("HOWTOPLAY", pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0], self.is_mouse_clicked_frame(), dt)
+        elif self.state == "STATISTICS":
+            self.menu_system.update("STATISTICS", pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0], self.is_mouse_clicked_frame(), dt)
+        elif self.state == "CREDITS":
+            self.menu_system.update("CREDITS", pygame.mouse.get_pos(), pygame.mouse.get_pressed()[0], self.is_mouse_clicked_frame(), dt)
+        elif self.state == "COUNTDOWN":
+            self.countdown_timer -= dt
+            if self.countdown_timer <= 0.0:
+                self.state = "PLAYING"
+                self.countdown_timer = 3.0
 
     def is_mouse_clicked_frame(self) -> bool:
         """Returns True if the mouse button was newly pressed this frames."""
@@ -733,6 +752,11 @@ class GameEngine:
                             
                         e.die(self.foods, self.particles)
                         self.audio_manager.play_sound("explosion")
+                        if idx > 0:
+                            self.kills += 1
+                            self.save_manager.increment_stat("ai_snakes_killed", 1)
+                            self.save_manager.set_max_stat("max_kills_in_run", self.kills)
+                            self.add_floating_text("+1 KILL!", e.x, e.y, Settings.COLOR_PINK, size=24)
                         if e in self.enemies:
                             self.enemies.remove(e)
                         break
@@ -923,6 +947,10 @@ class GameEngine:
         self.level += 1
         self.xp = 0.0
         
+        # Trigger level-up banner
+        self.levelup_banner_timer = 2.5
+        self.levelup_banner_level = self.level
+        
         # Increment max levels stat
         self.save_manager.set_max_stat("max_level_reached", self.level)
         
@@ -995,7 +1023,7 @@ class GameEngine:
         # Fetch current equipped skin
         equipped_skin = self.save_manager.get_current_skin()
         
-        if self.state in ["PLAYING", "GAMEOVER", "PAUSED"]:
+        if self.state in ["PLAYING", "GAMEOVER", "PAUSED", "COUNTDOWN"]:
             # Camera offset values to apply coordinates transformations
             ox, oy = self.camera.get_offset(shake_offset)
             
@@ -1081,6 +1109,7 @@ class GameEngine:
                 self.lives, 
                 self.snake.shield_active,
                 self.active_powerups, 
+                self.kills,
                 self.font_sm, 
                 self.font_md
             )
@@ -1092,6 +1121,14 @@ class GameEngine:
             # Draw Minimap
             self.hud.draw_minimap(self.screen, self.snake, self.foods, self.powerups, self.enemies, self.boss)
                 
+            # Draw Level-Up Banner
+            if self.levelup_banner_timer > 0.0:
+                self.draw_levelup_banner()
+
+            # Countdown Screen
+            if self.state == "COUNTDOWN":
+                self.draw_countdown_screen()
+
             # Pause Screen Overlay Text
             if self.state == "PAUSED":
                 self.draw_pause_screen()
@@ -1111,29 +1148,86 @@ class GameEngine:
         self._old_mouse_state = pygame.mouse.get_pressed()[0]
 
     def draw_pause_screen(self) -> None:
-        """Renders simple blurry screen overlay indicating pause."""
+        """Renders blurry screen overlay indicating pause with interactive buttons."""
         pause_overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        pause_overlay.fill((10, 10, 15, 180))  # Semi-transparent dark mask
+        pause_overlay.fill((10, 10, 15, 200))  # Semi-transparent dark mask
         self.screen.blit(pause_overlay, (0, 0))
         
         t_surf = self.font_lg.render("GAME PAUSED", True, Settings.COLOR_CYAN)
-        sub_surf = self.font_md.render("Press ESC to Resume or R to Restart", True, Settings.COLOR_WHITE)
+        self.screen.blit(t_surf, (self.width // 2 - t_surf.get_width() // 2, 130))
         
-        self.screen.blit(t_surf, (self.width // 2 - t_surf.get_width() // 2, self.height // 2 - 50))
-        self.screen.blit(sub_surf, (self.width // 2 - sub_surf.get_width() // 2, self.height // 2 + 10))
+        # Draw buttons
+        for b in self.menu_system.buttons.get("PAUSED", []):
+            b.draw(self.screen, self.font_sm)
 
     def draw_gameover_screen(self) -> None:
-        """Renders score panels and retry navigation instructions."""
+        """Renders score panels, detailed stats breakdown, and retry buttons."""
         go_overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        go_overlay.fill((20, 5, 5, 200))
+        go_overlay.fill((20, 5, 5, 220))
         self.screen.blit(go_overlay, (0, 0))
         
         t_surf = self.font_lg.render("GAME OVER", True, Settings.COLOR_RED)
-        score_surf = self.font_md.render(f"Final Score: {self.score}", True, Settings.COLOR_WHITE)
-        coins_surf = self.font_md.render(f"Coins Collected: {self.coins_earned}", True, Settings.COLOR_GOLD)
-        sub_surf = self.font_sm.render("Press R to Quick Restart or ESC to Main Menu", True, Settings.COLOR_GRAY)
+        self.screen.blit(t_surf, (self.width // 2 - t_surf.get_width() // 2, 80))
         
-        self.screen.blit(t_surf, (self.width // 2 - t_surf.get_width() // 2, self.height // 2 - 80))
-        self.screen.blit(score_surf, (self.width // 2 - score_surf.get_width() // 2, self.height // 2 - 10))
-        self.screen.blit(coins_surf, (self.width // 2 - coins_surf.get_width() // 2, self.height // 2 + 25))
-        self.screen.blit(sub_surf, (self.width // 2 - sub_surf.get_width() // 2, self.height // 2 + 80))
+        # Stats panel card
+        stats_rect = pygame.Rect(self.width // 2 - 200, 160, 400, 190)
+        Utils.draw_rounded_rect(self.screen, stats_rect, (15, 15, 25, 200), radius=12)
+        Utils.draw_rounded_rect(self.screen, stats_rect, Settings.COLOR_RED, radius=12, border_width=1)
+        
+        stats = [
+            ("FINAL SCORE", f"{self.score}"),
+            ("STAGE LEVEL", f"{self.level}"),
+            ("COINS EARNED", f"{self.coins_earned}"),
+            ("AI KILLS", f"{self.kills}"),
+            ("TIME SURVIVED", f"{int(self.game_time)}s")
+        ]
+        
+        y = 175
+        for label, val in stats:
+            label_surf = self.font_sm.render(label, True, Settings.COLOR_GRAY)
+            val_surf = self.font_md.render(val, True, Settings.COLOR_WHITE)
+            self.screen.blit(label_surf, (self.width // 2 - 170, y + 3))
+            self.screen.blit(val_surf, (self.width // 2 + 170 - val_surf.get_width(), y))
+            y += 32
+            
+        # Draw buttons
+        for b in self.menu_system.buttons.get("GAMEOVER", []):
+            b.draw(self.screen, self.font_sm)
+
+    def draw_countdown_screen(self) -> None:
+        """Renders a pulsing 3...2...1...GO! overlay text."""
+        overlay = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        overlay.fill((10, 10, 15, 100))
+        self.screen.blit(overlay, (0, 0))
+        
+        val = int(math.ceil(self.countdown_timer))
+        text = f"{val}" if val > 0 else "GO!"
+        
+        fract = self.countdown_timer - int(self.countdown_timer)
+        if fract < 0: fract = 0
+        scale = 1.0 + 0.4 * math.sin(fract * math.pi)
+        
+        txt_surf = self.font_lg.render(text, True, Settings.COLOR_CYAN if text != "GO!" else Settings.COLOR_GREEN)
+        scaled_w = int(txt_surf.get_width() * scale)
+        scaled_h = int(txt_surf.get_height() * scale)
+        txt_surf = pygame.transform.smoothscale(txt_surf, (scaled_w, scaled_h))
+        
+        self.screen.blit(txt_surf, (self.width // 2 - scaled_w // 2, self.height // 2 - scaled_h // 2))
+
+    def draw_levelup_banner(self) -> None:
+        """Renders an animated LEVEL UP! banner notification."""
+        alpha = 255
+        if self.levelup_banner_timer < 0.5:
+            alpha = int(255 * (self.levelup_banner_timer / 0.5))
+            
+        banner_surf = pygame.Surface((self.width, 100), pygame.SRCALPHA)
+        banner_surf.fill((15, 25, 15, int(180 * (alpha / 255.0))))
+        
+        pygame.draw.line(banner_surf, Settings.COLOR_GREEN, (0, 0), (self.width, 0), 2)
+        pygame.draw.line(banner_surf, Settings.COLOR_GREEN, (0, 98), (self.width, 98), 2)
+        
+        lvl_surf = self.font_lg.render(f"LEVEL UP! REACHED LEVEL {self.levelup_banner_level}", True, Settings.COLOR_GREEN)
+        banner_surf.blit(lvl_surf, (self.width // 2 - lvl_surf.get_width() // 2, 50 - lvl_surf.get_height() // 2))
+        
+        banner_surf.set_alpha(alpha)
+        self.screen.blit(banner_surf, (0, self.height // 2 - 120))

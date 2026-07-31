@@ -83,17 +83,16 @@ def main() -> None:
                         engine.set_state("PAUSED")
                     elif engine.state == "PAUSED":
                         engine.set_state("PLAYING")
-                    elif engine.state in ["SHOP", "SETTINGS", "HIGHSCORES", "ACHIEVEMENTS"]:
+                    elif engine.state in ["SHOP", "SETTINGS", "HIGHSCORES", "ACHIEVEMENTS", "KEYBINDINGS", "HOWTOPLAY", "STATISTICS", "CREDITS"]:
                         engine.set_state("MAIN")
                     elif engine.state == "GAMEOVER":
                         engine.set_state("MAIN")
                         
                 elif event.key == pygame.K_r:
                     # Quick reset triggers
-                    if engine.state in ["PLAYING", "GAMEOVER", "PAUSED"]:
+                    if engine.state in ["PLAYING", "GAMEOVER", "PAUSED", "COUNTDOWN"]:
                         engine.audio_manager.play_sound("button_click")
                         engine.start_new_game()
-                        engine.set_state("PLAYING")
                         
                 elif event.key == pygame.K_f:
                     # Toggle fullscreen flag

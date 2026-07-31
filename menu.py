@@ -76,25 +76,29 @@ class MenuSystem:
         # Active sliders
         self.sliders: List[Slider] = []
         
-        # Shop pagination / selection indexes
+        # Pagination / selection indexes
         self.shop_scroll_index = 0
+        self.ach_page = 0
         self.logo_pulse: float = 0.0
         self.rebind_target = None
         
         self.init_menus()
 
     def init_menus(self) -> None:
-        """Initializes buttons layout for each state: MAIN, SHOP, SETTINGS, HIGHSCORES, ACHIEVEMENTS."""
+        """Initializes buttons layout for each state: MAIN, SHOP, SETTINGS, HIGHSCORES, ACHIEVEMENTS, HOWTOPLAY, STATISTICS, CREDITS, PAUSED, GAMEOVER."""
         cx = self.width // 2
         
-        # 1. MAIN MENU
+        # 1. MAIN MENU (Bigger list of features)
         self.buttons["MAIN"] = [
-            UIButton(pygame.Rect(cx - 120, 220, 240, 45), "PLAY", lambda: self.change_state("PLAYING"), Settings.COLOR_CYAN, Settings.COLOR_GREEN),
-            UIButton(pygame.Rect(cx - 120, 280, 240, 45), "SHOP", lambda: self.change_state("SHOP"), Settings.COLOR_CYAN, Settings.COLOR_PINK),
-            UIButton(pygame.Rect(cx - 120, 340, 240, 45), "HIGHSCORES", lambda: self.change_state("HIGHSCORES")),
-            UIButton(pygame.Rect(cx - 120, 400, 240, 45), "ACHIEVEMENTS", lambda: self.change_state("ACHIEVEMENTS")),
-            UIButton(pygame.Rect(cx - 120, 460, 240, 45), "SETTINGS", lambda: self.change_state("SETTINGS")),
-            UIButton(pygame.Rect(cx - 120, 520, 240, 45), "EXIT", lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)), Settings.COLOR_RED, Settings.COLOR_PINK)
+            UIButton(pygame.Rect(cx - 120, 180, 240, 42), "PLAY", lambda: self.change_state("PLAYING"), Settings.COLOR_CYAN, Settings.COLOR_GREEN),
+            UIButton(pygame.Rect(cx - 120, 230, 240, 42), "SHOP", lambda: self.change_state("SHOP"), Settings.COLOR_CYAN, Settings.COLOR_PINK),
+            UIButton(pygame.Rect(cx - 120, 280, 240, 42), "HOW TO PLAY", lambda: self.change_state("HOWTOPLAY")),
+            UIButton(pygame.Rect(cx - 120, 330, 240, 42), "STATISTICS", lambda: self.change_state("STATISTICS")),
+            UIButton(pygame.Rect(cx - 120, 380, 240, 42), "HIGHSCORES", lambda: self.change_state("HIGHSCORES")),
+            UIButton(pygame.Rect(cx - 120, 430, 240, 42), "ACHIEVEMENTS", lambda: self.change_state("ACHIEVEMENTS")),
+            UIButton(pygame.Rect(cx - 120, 480, 240, 42), "SETTINGS", lambda: self.change_state("SETTINGS")),
+            UIButton(pygame.Rect(cx - 120, 530, 240, 42), "CREDITS", lambda: self.change_state("CREDITS")),
+            UIButton(pygame.Rect(cx - 120, 580, 240, 42), "EXIT", lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)), Settings.COLOR_RED, Settings.COLOR_PINK)
         ]
 
         # 2. SHOP MENU BACK BUTTON
@@ -107,8 +111,9 @@ class MenuSystem:
             UIButton(pygame.Rect(cx - 220, 420, 200, 40), "CONTROLS: WASD", self.toggle_controls),
             UIButton(pygame.Rect(cx + 20, 420, 200, 40), "CUSTOMIZE KEYS", lambda: self.change_state("KEYBINDINGS")),
             UIButton(pygame.Rect(cx - 220, 480, 200, 40), "DIFFICULTY: MED", self.toggle_difficulty),
-            UIButton(pygame.Rect(cx + 20, 480, 200, 40), "HORROR MODE: OFF", self.toggle_horror_mode, Settings.COLOR_BLOOD_RED, Settings.COLOR_RED),
-            UIButton(pygame.Rect(cx - 100, 540, 200, 40), "BACK", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE)
+            UIButton(pygame.Rect(cx + 20, 480, 200, 40), "FULLSCREEN: OFF", self.toggle_fullscreen_menu),
+            UIButton(pygame.Rect(cx - 220, 540, 200, 40), "HORROR MODE: OFF", self.toggle_horror_mode, Settings.COLOR_BLOOD_RED, Settings.COLOR_RED),
+            UIButton(pygame.Rect(cx + 20, 540, 200, 40), "BACK", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE)
         ]
         
         # 3.5. KEYBINDINGS MENU
@@ -120,6 +125,7 @@ class MenuSystem:
             UIButton(pygame.Rect(cx - 210, 430, 200, 40), "RESET DEFAULTS", self.reset_keys, Settings.COLOR_BLOOD_RED, Settings.COLOR_RED),
             UIButton(pygame.Rect(cx + 10, 430, 200, 40), "BACK", lambda: self.change_state("SETTINGS"), Settings.COLOR_GRAY, Settings.COLOR_WHITE)
         ]
+        
         # Set slider coordinates
         sets = self.save_manager.get_settings()
         self.sliders = [
@@ -134,9 +140,40 @@ class MenuSystem:
             UIButton(pygame.Rect(cx - 100, 560, 200, 40), "BACK", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE)
         ]
         
-        # 5. ACHIEVEMENTS MENU
+        # 5. ACHIEVEMENTS MENU (Paginated Scroll)
         self.buttons["ACHIEVEMENTS"] = [
-            UIButton(pygame.Rect(cx - 100, 580, 200, 40), "BACK", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE)
+            UIButton(pygame.Rect(cx - 250, 580, 140, 40), "PREV PAGE", self.prev_ach_page, Settings.COLOR_CYAN, Settings.COLOR_BLUE),
+            UIButton(pygame.Rect(cx - 70, 580, 140, 40), "BACK", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE),
+            UIButton(pygame.Rect(cx + 110, 580, 140, 40), "NEXT PAGE", self.next_ach_page, Settings.COLOR_CYAN, Settings.COLOR_BLUE)
+        ]
+
+        # 8. HOW TO PLAY BACK BUTTON
+        self.buttons["HOWTOPLAY"] = [
+            UIButton(pygame.Rect(cx - 100, 560, 200, 40), "BACK", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE)
+        ]
+
+        # 9. STATISTICS BACK BUTTON
+        self.buttons["STATISTICS"] = [
+            UIButton(pygame.Rect(cx - 100, 560, 200, 40), "BACK", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE)
+        ]
+
+        # 10. CREDITS BACK BUTTON
+        self.buttons["CREDITS"] = [
+            UIButton(pygame.Rect(cx - 100, 560, 200, 40), "BACK", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE)
+        ]
+
+        # 11. PAUSE MENU BUTTONS
+        self.buttons["PAUSED"] = [
+            UIButton(pygame.Rect(cx - 120, 240, 240, 45), "RESUME", lambda: self.change_state("PLAYING"), Settings.COLOR_CYAN, Settings.COLOR_GREEN),
+            UIButton(pygame.Rect(cx - 120, 300, 240, 45), "RESTART", lambda: self.change_state("PLAYING"), Settings.COLOR_CYAN, Settings.COLOR_GOLD),
+            UIButton(pygame.Rect(cx - 120, 360, 240, 45), "MAIN MENU", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE),
+            UIButton(pygame.Rect(cx - 120, 420, 240, 45), "QUIT GAME", lambda: pygame.event.post(pygame.event.Event(pygame.QUIT)), Settings.COLOR_RED, Settings.COLOR_PINK)
+        ]
+
+        # 12. GAME OVER MENU BUTTONS
+        self.buttons["GAMEOVER"] = [
+            UIButton(pygame.Rect(cx - 120, 380, 240, 45), "PLAY AGAIN", lambda: self.change_state("PLAYING"), Settings.COLOR_CYAN, Settings.COLOR_GREEN),
+            UIButton(pygame.Rect(cx - 120, 440, 240, 45), "MAIN MENU", lambda: self.change_state("MAIN"), Settings.COLOR_GRAY, Settings.COLOR_WHITE)
         ]
 
     def sync_settings_buttons_labels(self) -> None:
@@ -147,9 +184,12 @@ class MenuSystem:
         self.buttons["SETTINGS"][0].text = f"CONTROLS: {sets.get('control_scheme', 'WASD')}"
         # Update Difficulty Toggle
         self.buttons["SETTINGS"][2].text = f"DIFFICULTY: {sets.get('difficulty', 'Medium').upper()}"
+        # Update Fullscreen Toggle
+        fs_str = "ON" if sets.get("fullscreen", False) else "OFF"
+        self.buttons["SETTINGS"][3].text = f"FULLSCREEN: {fs_str}"
         # Update Horror Toggle
         h_str = "ON" if sets.get("horror_mode", False) else "OFF"
-        self.buttons["SETTINGS"][3].text = f"HORROR MODE: {h_str}"
+        self.buttons["SETTINGS"][4].text = f"HORROR MODE: {h_str}"
         
         # Sync Keybindings labels
         if "KEYBINDINGS" in self.buttons:
@@ -224,6 +264,25 @@ class MenuSystem:
         sets["horror_mode"] = not sets.get("horror_mode", False)
         self.save_manager.update_settings(sets)
         self.sync_settings_buttons_labels()
+        self.audio_manager.play_sound("button_click")
+
+    def toggle_fullscreen_menu(self) -> None:
+        sets = self.save_manager.get_settings()
+        is_fullscreen = not sets.get("fullscreen", False)
+        sets["fullscreen"] = is_fullscreen
+        self.save_manager.update_settings(sets)
+        self.sync_settings_buttons_labels()
+        self.audio_manager.play_sound("button_click")
+        # Post event to main.py to toggle screen
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_f))
+
+    def prev_ach_page(self) -> None:
+        self.ach_page = max(0, self.ach_page - 1)
+        self.audio_manager.play_sound("button_click")
+        
+    def next_ach_page(self) -> None:
+        max_pages = (len(Settings.ACHIEVEMENTS) - 1) // 5
+        self.ach_page = min(max_pages, self.ach_page + 1)
         self.audio_manager.play_sound("button_click")
 
     def update(self, current_menu_state: str, mouse_pos: Tuple[int, int], mouse_down: bool, clicked_trigger: bool, dt: float) -> None:
@@ -320,6 +379,12 @@ class MenuSystem:
             self.draw_achievements_menu(surface, font_sm, font_md, font_lg)
         elif current_state == "KEYBINDINGS":
             self.draw_keybindings_menu(surface, font_sm, font_md, font_lg)
+        elif current_state == "HOWTOPLAY":
+            self.draw_howtoplay_menu(surface, font_sm, font_md, font_lg)
+        elif current_state == "STATISTICS":
+            self.draw_statistics_menu(surface, font_sm, font_md, font_lg)
+        elif current_state == "CREDITS":
+            self.draw_credits_menu(surface, font_sm, font_md, font_lg)
             
         # Draw base navigation buttons
         for b in self.buttons.get(current_state, []):
@@ -541,9 +606,13 @@ class MenuSystem:
         
         unlocked_list = self.save_manager.data["unlocked_achievements"]
         
-        # Render top 5 achievements dynamically slithered inside scroll view
+        # Render achievements dynamically 5 per page based on current page
         ach_y = 150
-        for ach in Settings.ACHIEVEMENTS[:5]:  # Display first 5 (can add scroll paging in updates)
+        start_idx = self.ach_page * 5
+        end_idx = start_idx + 5
+        visible_ach = Settings.ACHIEVEMENTS[start_idx:end_idx]
+        
+        for ach in visible_ach:
             unlocked = ach["id"] in unlocked_list
             bg_col = (20, 30, 20) if unlocked else (30, 30, 35)
             border_col = Settings.COLOR_GREEN if unlocked else Settings.COLOR_GRAY
@@ -569,9 +638,10 @@ class MenuSystem:
             
             ach_y += 75
             
-        # Draw simple page tag
-        page_surf = font_sm.render("Showing top achievements - Unlock in game!", True, Settings.COLOR_GRAY)
-        surface.blit(page_surf, (cx - page_surf.get_width()//2, 515))
+        # Draw page tag
+        total_pages = ((len(Settings.ACHIEVEMENTS) - 1) // 5) + 1
+        page_surf = font_sm.render(f"Page {self.ach_page + 1} of {total_pages} - Unlock during gameplay!", True, Settings.COLOR_GRAY)
+        surface.blit(page_surf, (cx - page_surf.get_width()//2, 535))
 
     def draw_keybindings_menu(self, surface: pygame.Surface, font_sm: pygame.font.Font, font_md: pygame.font.Font, font_lg: pygame.font.Font) -> None:
         cx = self.width // 2
@@ -583,3 +653,105 @@ class MenuSystem:
         desc = "Click an action, then press any key. Esc to cancel."
         desc_surf = font_md.render(desc, True, Settings.COLOR_GRAY)
         surface.blit(desc_surf, (cx - desc_surf.get_width()//2, 120))
+
+    def draw_howtoplay_menu(self, surface: pygame.Surface, font_sm: pygame.font.Font, font_md: pygame.font.Font, font_lg: pygame.font.Font) -> None:
+        cx = self.width // 2
+        # Title
+        t_surf = font_lg.render("HOW TO PLAY", True, Settings.COLOR_CYAN)
+        surface.blit(t_surf, (cx - t_surf.get_width()//2, 50))
+        
+        # Help Box
+        help_panel = pygame.Rect(cx - 450, 130, 900, 420)
+        Utils.draw_rounded_rect(surface, help_panel, (15, 15, 20, 220), radius=12)
+        Utils.draw_rounded_rect(surface, help_panel, Settings.COLOR_CYAN, radius=12, border_width=1)
+        
+        # Instructions text lines
+        instructions = [
+            "• CONTROLS: Slither using WASD / Arrow keys. Configure custom keys in Settings.",
+            "• GAMEPLAY: Eat energy food blocks to grow in length and score points.",
+            "• BATTLE ARENA: Steer enemies into your tail body to explode them. Avoid colliding head-on!",
+            "• POWERUPS: Pick up high-res spritesheet icons to gain powerful combat modifiers:",
+            "  - Magnet: Vacuum food towards snake head.",
+            "  - Shield: Absorb one collision crash.",
+            "  - Speed Boost: Slither faster. Speed alters camera zoom.",
+            "  - Invincibility: Glow with rainbow energy and pass through obstacles.",
+            "  - Slow Motion: Dilate time to dodge danger easily.",
+            "• BOSS ENCOUNTERS: Every 10 levels, fight a Boss Core by shooting tracking laser rockets!"
+        ]
+        
+        y = 160
+        for line in instructions:
+            text_surf = font_sm.render(line, True, Settings.COLOR_WHITE if not line.startswith("  -") else Settings.COLOR_CYAN)
+            surface.blit(text_surf, (cx - 420, y))
+            y += 34
+
+    def draw_statistics_menu(self, surface: pygame.Surface, font_sm: pygame.font.Font, font_md: pygame.font.Font, font_lg: pygame.font.Font) -> None:
+        cx = self.width // 2
+        t_surf = font_lg.render("LIFETIME STATISTICS", True, Settings.COLOR_GOLD)
+        surface.blit(t_surf, (cx - t_surf.get_width()//2, 50))
+        
+        stats_panel = pygame.Rect(cx - 300, 130, 600, 420)
+        Utils.draw_rounded_rect(surface, stats_panel, (15, 15, 20, 220), radius=12)
+        Utils.draw_rounded_rect(surface, stats_panel, Settings.COLOR_GOLD, radius=12, border_width=1)
+        
+        stats_data = self.save_manager.data.get("stats", {})
+        
+        # Formatted fields
+        play_sec = int(stats_data.get("time_played_seconds", 0.0))
+        h = play_sec // 3600
+        m = (play_sec % 3600) // 60
+        s = play_sec % 60
+        time_str = f"{h:02d}h {m:02d}m {s:02d}s"
+        
+        stat_rows = [
+            ("TOTAL GAMES PLAYED", f"{stats_data.get('games_played', 0)}"),
+            ("TOTAL FOOD CONSUMED", f"{stats_data.get('total_food_eaten', 0)}"),
+            ("AI SNAKES DEFEATED", f"{stats_data.get('ai_snakes_killed', 0)}"),
+            ("BOSS CORES EXPLODED", f"{stats_data.get('total_bosses_defeated', 0)}"),
+            ("TOTAL DEATHS RECORDED", f"{stats_data.get('total_deaths', 0)}"),
+            ("MAX SCORE REACHED", f"{self.save_manager.get_high_score()}"),
+            ("MAX LEVEL ACHIEVED", f"{stats_data.get('max_level_reached', 1)}"),
+            ("MAX BATTLEFIELD KILLS", f"{stats_data.get('max_kills_in_run', 0)}"),
+            ("MAX COMBO RATE", f"{stats_data.get('max_combo_reached', 0)}x"),
+            ("TOTAL PLAYTIME", time_str)
+        ]
+        
+        y = 160
+        for label, val in stat_rows:
+            label_surf = font_sm.render(label, True, Settings.COLOR_GRAY)
+            val_surf = font_md.render(val, True, Settings.COLOR_WHITE)
+            
+            surface.blit(label_surf, (cx - 260, y + 4))
+            surface.blit(val_surf, (cx + 260 - val_surf.get_width(), y))
+            
+            # Subtle divider
+            pygame.draw.line(surface, (30, 30, 40), (cx - 260, y + 33), (cx + 260, y + 33), 1)
+            y += 36
+
+    def draw_credits_menu(self, surface: pygame.Surface, font_sm: pygame.font.Font, font_md: pygame.font.Font, font_lg: pygame.font.Font) -> None:
+        cx = self.width // 2
+        t_surf = font_lg.render("GAME CREDITS", True, Settings.COLOR_PINK)
+        surface.blit(t_surf, (cx - t_surf.get_width()//2, 50))
+        
+        credits_panel = pygame.Rect(cx - 300, 130, 600, 390)
+        Utils.draw_rounded_rect(surface, credits_panel, (15, 15, 20, 220), radius=12)
+        Utils.draw_rounded_rect(surface, credits_panel, Settings.COLOR_PINK, radius=12, border_width=1)
+        
+        credits = [
+            ("DEVELOPER", "VAIBHAV MISHRA"),
+            ("GAME ENGINE", "PYGAME COMMUNITY EDITION"),
+            ("LANGUAGE", "PYTHON 3.14"),
+            ("GRAPHICS STYLE", "GLOWING NEON CYBERPUNK"),
+            ("AUDIO COMPOSITION", "SYNTHESIZED NEON CHIPTUNES"),
+            ("SPECIAL THANKS", "GEMINI CO-PILOT PARTNER"),
+            ("EDITION", "EXPERT COMMUNITY EDITION 2026")
+        ]
+        
+        y = 170
+        for title, name in credits:
+            title_surf = font_sm.render(title, True, Settings.COLOR_PINK)
+            name_surf = font_md.render(name, True, Settings.COLOR_WHITE)
+            
+            surface.blit(title_surf, (cx - title_surf.get_width() // 2, y))
+            surface.blit(name_surf, (cx - name_surf.get_width() // 2, y + 20))
+            y += 48
