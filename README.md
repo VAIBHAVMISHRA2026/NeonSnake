@@ -4,6 +4,7 @@
 
 - **🌐 Play Instantly on Mobile & PC (Web Browser):** [**Click Here to Play Live**](https://vaibhavmishra2026.github.io/NeonSnake/)
 - **📱 Install Mobile App (Android & iOS):** Open the live web link in your phone's browser, open the menu, and click **"Add to Home Screen"** or **"Install"** to install it as a standalone app!
+- **🤖 Download Android APK (Standalone App):** [**Download compiled .apk from GitHub Actions**](https://github.com/VAIBHAVMISHRA2026/NeonSnake/actions) (Go to the latest run and download the compiled APK file under the Artifacts section!)
 - **💻 Download for Desktop (Windows App):** [**Download NeonSnakeArena.exe (17.5 MB)**](https://github.com/VAIBHAVMISHRA2026/NeonSnake/raw/main/dist/NeonSnakeArena.exe)
 
 ---
